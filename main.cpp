@@ -42,6 +42,7 @@ int main()
         // updating
 
         car.tick();
+        track.update();
 
         // drawing
         window.clear();

@@ -5,6 +5,8 @@
 #ifndef SELFDRIVINGCAR_TRACK_H
 #define SELFDRIVINGCAR_TRACK_H
 
+
+
 #include <SFML/Graphics.hpp>
 #include "Car.h"
 
@@ -16,13 +18,18 @@ public:
     std::vector<sf::Vector2f> collisionPoints;
 
     void setup(sf::RenderWindow *window);
+    void update();
     void drawPoints(sf::RenderTarget &target, sf::RenderStates states) const;
     void handleEvents(sf::Event event);
     void generateCollisionPoints();
     sf::Vector2f* lineIntersects(sf::Vector2f p0, sf::Vector2f p1);
     sf::Vector2f* carIntersects(Car *car);
 protected:
+    sf::Vector2f* selectedPoint;
+    bool isShowingPoints;
+
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
+    sf::Vector2f* searchForPoint(sf::Vector2<int> mousePosition);
 };
 
 
