@@ -5,9 +5,23 @@
 #ifndef SELFDRIVINGCAR_NEURALNETWORK_H
 #define SELFDRIVINGCAR_NEURALNETWORK_H
 
+#include <SFML/Graphics.hpp>
+#include "Layer.h"
 
-class NeuralNetwork {
+#define INPUT_LAYER 0
 
+class NeuralNetwork: public sf::Drawable {
+public:
+
+    int amountOfLayers;
+    const int inputLayerIndex = 0;
+    int outputLayerIndex;
+    int biggestLayerSize = 0;
+    Layer **layers;
+    NeuralNetwork(int amountOfInputsNeurons, int amountOfHiddenLayers, int amountOfOutputNeurons, int hiddenLayerSizes[amountOfInputsNeurons]);
+    void compute();
+    void randomize();
+    void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
 

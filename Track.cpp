@@ -110,7 +110,7 @@ void Track::generateCollisionPoints() {
     collisionPoints.clear();
     for (int i = 0; i < points.size(); i += 3) {
         if (i + 4 > points.size()) break;
-        addBezierCurvePoints(&collisionPoints, points[i], points[i + 1], points[i + 2], points[i + 3], 8);
+        addBezierCurvePoints(&collisionPoints, points[i], points[i + 1], points[i + 2], points[i + 3], segments);
     }
 }
 
@@ -156,7 +156,7 @@ void Track::update() {
     }
 }
 
-sf::Vector2f *Track::closestLineIntersect(sf::Vector2f origin, sf::Vector2f p0, sf::Vector2f p1) {
+sf::Vector2f *Track::closestLineIntersect(sf::Vector2f origin, sf::Vector2f p0, sf::Vector2f p1) const {
     if(collisionPoints.empty()) { return nullptr; }
 
     sf::Vector2f *closestCollisionPoint = nullptr;
@@ -170,6 +170,7 @@ sf::Vector2f *Track::closestLineIntersect(sf::Vector2f origin, sf::Vector2f p0, 
         int distance = diff.x*diff.x + diff.y*diff.y;
         if(distance < recordDistance) {
             closestCollisionPoint = collisionPoint;
+            recordDistance = distance;
         }
     }
 

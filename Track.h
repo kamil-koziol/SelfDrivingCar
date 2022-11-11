@@ -13,6 +13,7 @@
 class Track: public sf::Drawable, public sf::Transformable {
 public:
     sf::RenderWindow *window;
+    int segments = 8;
 
     std::vector<sf::Vector2f> points;
     std::vector<sf::Vector2f> collisionPoints;
@@ -23,7 +24,7 @@ public:
     void handleEvents(sf::Event event);
     void generateCollisionPoints();
     sf::Vector2f* lineIntersects(sf::Vector2f p0, sf::Vector2f p1);
-    sf::Vector2f* closestLineIntersect(sf::Vector2f origin, sf::Vector2f p0, sf::Vector2f p1);
+    sf::Vector2f* closestLineIntersect(sf::Vector2f origin, sf::Vector2f p0, sf::Vector2f p1) const;
     sf::Vector2f* carIntersects(Car *car);
 protected:
     sf::Vector2f* selectedPoint;

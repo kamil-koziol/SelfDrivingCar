@@ -4,19 +4,33 @@
 #include "Track.h"
 #include "iostream"
 #include "utils/CollisionUtils.h"
+#include "vector"
+#include "thread"
+#include "Matrix.h"
+#include "time.h"
+#include "NeuralNetwork.h"
 
 const int width = 1000;
-
 const int height = 1000;
+
 
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(width, height), "SFML Application");
+    srand(time(NULL));
+
+    sf::RenderWindow window(sf::VideoMode(width, height), "Self Driving Car");
     window.setFramerateLimit(60);
 
     Car car;
     Track track;
+    int sizes[] = { 5 , 5};
+    NeuralNetwork network = NeuralNetwork(10, 2, 8, sizes);
+    Matrix input = Matrix(network.layers[network.inputLayerIndex]->size, 1);
+    input.randomize();
+    network.layers[network.inputLayerIndex]->neurons->copyFrom(&input);
+    network.randomize();
+    network.compute();
 
     // setup
 
@@ -25,6 +39,7 @@ int main()
 
     while (window.isOpen())
     {
+
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -43,6 +58,8 @@ int main()
         car.tick();
         track.update();
 
+        network.compute();
+
         // drawing
         window.clear();
 
@@ -51,10 +68,12 @@ int main()
 
         window.draw(track);
 
+        window.draw(network);
+
         sf::CircleShape shape(10.0f);
 
         sf::Vector2f *isp = track.carIntersects(&car);
-        if(isp != nullptr) {
+        if (isp != nullptr) {
             shape.setFillColor(sf::Color::Green);
             shape.setRadius(15.0f);
             shape.setPosition(*isp);
@@ -62,9 +81,11 @@ int main()
             window.draw(shape);
         }
 
-        for(int i=0; i<car.amountOfVisionLines; i++) {
-            sf::Vector2f *colPoint = track.closestLineIntersect(car.visionLinesOrigin ,car.visionLinesOrigin, car.visionLines[i]);
-            if(colPoint != nullptr) {
+
+        for (int i = 0; i < car.amountOfVisionLines; i++) {
+            sf::Vector2f *colPoint = track.closestLineIntersect(car.visionLinesOrigin, car.visionLinesOrigin,
+                                                                car.visionLines[i]);
+            if (colPoint != nullptr) {
                 shape.setFillColor(sf::Color::Green);
                 shape.setRadius(15.0f);
                 shape.setPosition(*colPoint);

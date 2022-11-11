@@ -16,7 +16,7 @@ public:
 
     sf::RenderWindow *window;
 
-    static const int amountOfVisionLines = 10;
+    static const int amountOfVisionLines = 8;
     int visionLinesDistance = 1000;
     sf::Vector2f visionLines[amountOfVisionLines];
     sf::Vector2f visionLinesOrigin;

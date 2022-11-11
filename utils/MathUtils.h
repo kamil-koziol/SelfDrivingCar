@@ -12,6 +12,7 @@
 #define RAD2DEG (180/M_PI)
 
 sf::Vector2f getOffsetedPointWithRotation(sf::Vector2f origin, float offsetX, float offsetY, float rotation);
+float relu(float value);
 
 
 #endif //SELFDRIVINGCAR_MATHUTILS_H

@@ -8,10 +8,20 @@
 
 class Matrix {
 public:
-    int n;
-    float *values; // NxN
-    Matrix(int n);
-
+    int m,n;
+    float *values; // MxN
+    Matrix(int m, int n);
+    Matrix* mult(Matrix *other);
+    void add(Matrix *other);
+    float get(int x, int y);
+    float get(int index);
+    void set(int x, int y, float value);
+    void print();
+    void randomize(bool negatives=false);
+    void copyFrom(Matrix *other);
+    void applyFunction(float (*func) (float));
+    bool canBeMultiplied(Matrix *other);
+    bool haveSameDimensions(Matrix *other);
 };
 
 

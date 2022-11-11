@@ -3,7 +3,7 @@ project(SelfDrivingCar)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(SelfDrivingCar main.cpp Car.cpp Car.h utils/MathUtils.cpp utils/MathUtils.h Track.cpp Track.h utils/BezierUtils.cpp utils/BezierUtils.h utils/CollisionUtils.cpp utils/CollisionUtils.h NeuralNetwork.cpp NeuralNetwork.h Matrix.cpp Matrix.h)
+add_executable(SelfDrivingCar main.cpp Car.cpp Car.h utils/MathUtils.cpp utils/MathUtils.h Track.cpp Track.h utils/BezierUtils.cpp utils/BezierUtils.h utils/CollisionUtils.cpp utils/CollisionUtils.h NeuralNetwork.cpp NeuralNetwork.h Matrix.cpp Matrix.h Layer.cpp Layer.h)
 include_directories(/usr/local/include)
 
 find_package(SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
