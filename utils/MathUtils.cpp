@@ -3,3 +3,12 @@
 //
 
 #include "MathUtils.h"
+
+sf::Vector2f getOffsetedPointWithRotation(sf::Vector2f origin, float offsetX, float offsetY, float rotation) {
+    sf::Vector2f cp1 = origin;
+    float cosr = cos(rotation);
+    float sinr = sin(rotation);
+    cp1.x += cosr * offsetX - sinr * offsetY;
+    cp1.y += sinr * offsetX + cosr * offsetY;
+    return cp1;
+}

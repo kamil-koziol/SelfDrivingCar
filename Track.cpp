@@ -38,6 +38,7 @@ void Track::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 
 void Track::setup(sf::RenderWindow *window) {
     this->window = window;
+    generateCollisionPoints();
 }
 
 void Track::drawPoints(sf::RenderTarget &target, sf::RenderStates states) const {
@@ -51,13 +52,13 @@ void Track::drawPoints(sf::RenderTarget &target, sf::RenderStates states) const 
     for(int i=0; i<points.size(); i++) {
 
         // connecting tangent dots
-//        if(i%3 == 0 || i%3 == 2) {
-//            if(i+1 < points.size()) {
-//                line[0] = points[i];
-//                line[1] = points[i + 1];
-//                target.draw(line, 2, sf::Lines);
-//            }
-//        }
+        if(i%3 == 0 || i%3 == 2) {
+            if(i+1 < points.size()) {
+                line[0] = points[i];
+                line[1] = points[i + 1];
+                target.draw(line, 2, sf::Lines);
+            }
+        }
 
         shape.setPosition(points[i]);
 
@@ -97,6 +98,7 @@ void Track::generateCollisionPoints() {
 }
 
 sf::Vector2f *Track::lineIntersects(sf::Vector2f p0, sf::Vector2f p1) {
+    if(collisionPoints.empty()) { return nullptr; }
     for(int i=0; i<collisionPoints.size()-1; i++) {
         sf::Vector2f *collisionPoint = getLineIntersection(p0, p1, collisionPoints[i], collisionPoints[i+1]);
         if(collisionPoint != nullptr) return collisionPoint;
@@ -106,11 +108,31 @@ sf::Vector2f *Track::lineIntersects(sf::Vector2f p0, sf::Vector2f p1) {
 }
 
 sf::Vector2f *Track::carIntersects(Car *car) {
-    if(collisionPoints.size() == 0) { return nullptr; }
+    if(collisionPoints.empty()) { return nullptr; }
     for(int i=0; i<collisionPoints.size()-1; i++) {
         sf::Vector2f *collisionPoint = car->intersectsWithLine(collisionPoints[i], collisionPoints[i+1]);
         if(collisionPoint != nullptr) return collisionPoint;
     }
 
     return nullptr;
+}
+
+sf::Vector2f *Track::closestLineIntersect(sf::Vector2f origin, sf::Vector2f p0, sf::Vector2f p1) {
+    if(collisionPoints.empty()) { return nullptr; }
+
+    sf::Vector2f *closestCollisionPoint = nullptr;
+    int recordDistance = INT32_MAX;
+
+    for(int i=0; i<collisionPoints.size()-1; i++) {
+        sf::Vector2f *collisionPoint = getLineIntersection(p0, p1, collisionPoints[i], collisionPoints[i+1]);
+        if(collisionPoint == nullptr) continue;
+
+        sf::Vector2f diff = *collisionPoint - origin;
+        int distance = diff.x*diff.x + diff.y*diff.y;
+        if(distance < recordDistance) {
+            closestCollisionPoint = collisionPoint;
+        }
+    }
+
+    return closestCollisionPoint;
 }

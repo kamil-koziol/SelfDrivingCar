@@ -6,6 +6,7 @@
 #include "math.h"
 #include "utils/MathUtils.h"
 #include "utils/CollisionUtils.h"
+#include "iostream"
 
 void Car::setup(sf::RenderWindow *window) {
     this->window = window;
@@ -13,6 +14,8 @@ void Car::setup(sf::RenderWindow *window) {
     setSize(sf::Vector2f(width, height));
     setPosition(200, 200);
     setOrigin(width/2,height/2);
+
+    updateVisionLines();
 }
 
 void Car::tick() {
@@ -25,6 +28,7 @@ void Car::tick() {
     }
 
     updatePointPositions();
+    updateVisionLines();
 }
 
 
@@ -75,17 +79,44 @@ sf::Vector2f *Car::intersectsWithLine(sf::Vector2f p0, sf::Vector2f p1) {
     return nullptr;
 }
 
-sf::Vector2f Car::getOffsetedPointWithRotation(float offsetX, float offsetY) {
-    sf::Vector2f cp1 = getPosition();
-    float angle = getRotation() * DEG2RAD;
-    cp1.x += cos(angle) * offsetX - sin(angle) * offsetY;
-    cp1.y += sin(angle) * offsetX + cos(angle) * offsetY;
-    return cp1;
-}
+//sf::Vector2f Car::getOffsetedPointWithRotation(float offsetX, float offsetY) {
+//    sf::Vector2f cp1 = getPosition();
+//    float angle = getRotation() * DEG2RAD;
+//    cp1.x += cos(angle) * offsetX - sin(angle) * offsetY;
+//    cp1.y += sin(angle) * offsetX + cos(angle) * offsetY;
+//    return cp1;
+//}
 
 void Car::updatePointPositions() {
-    points[TOP_LEFT] = getOffsetedPointWithRotation(-width/2, -height/2);
-    points[TOP_RIGHT] = getOffsetedPointWithRotation(width/2, -height/2);
-    points[DOWN_LEFT] = getOffsetedPointWithRotation(-width/2, height/2);
-    points[DOWN_RIGHT] = getOffsetedPointWithRotation(width/2, height/2);
+    float angle = getRotation() * DEG2RAD;
+    points[TOP_LEFT] = getOffsetedPointWithRotation(getPosition(), -width/2, -height/2, angle);
+    points[TOP_RIGHT] = getOffsetedPointWithRotation(getPosition(), width/2, -height/2, angle);
+    points[DOWN_LEFT] = getOffsetedPointWithRotation(getPosition(), -width/2, height/2, angle);
+    points[DOWN_RIGHT] = getOffsetedPointWithRotation(getPosition(), width/2, height/2, angle);
+}
+
+void Car::updateVisionLines() {
+
+    float angleStep = M_PI/(amountOfVisionLines - 1);
+    float angle = -M_PI + getRotation()*DEG2RAD;
+
+    visionLinesOrigin = getOffsetedPointWithRotation(getPosition(), 0, -height/2, getRotation() * DEG2RAD);
+
+    for(int i=0; i<amountOfVisionLines; i++) {
+        sf::Vector2f newPoint = visionLinesOrigin;
+        newPoint.x += cos(angle) * visionLinesDistance;
+        newPoint.y += sin(angle) * visionLinesDistance;
+        visionLines[i] = newPoint;
+        angle += angleStep;
+    }
+}
+
+void Car::drawVisionLines() {
+    sf::Vertex line[2];
+    line[0] = visionLinesOrigin;
+
+    for(int i=0; i<amountOfVisionLines; i++) {
+        line[1] = visionLines[i];
+        window->draw(line, 2, sf::Lines);
+    }
 }

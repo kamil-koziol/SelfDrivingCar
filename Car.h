@@ -16,8 +16,13 @@ public:
 
     sf::RenderWindow *window;
 
-    float width = 100; // 10
-    float height = 200; // 35
+    static const int amountOfVisionLines = 10;
+    int visionLinesDistance = 1000;
+    sf::Vector2f visionLines[amountOfVisionLines];
+    sf::Vector2f visionLinesOrigin;
+
+    float width = 10;
+    float height = 35;
 
     bool isRotating = false;
     float rotatingSpeed = 3;
@@ -32,8 +37,9 @@ public:
     sf::Vector2f points[4];
 
     sf::Vector2f* intersectsWithLine(sf::Vector2f p0, sf::Vector2f p1);
-    sf::Vector2f getOffsetedPointWithRotation(float offsetX, float offsetY);
     void updatePointPositions();
+    void updateVisionLines();
+    void drawVisionLines();
 };
 
 

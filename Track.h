@@ -20,6 +20,7 @@ public:
     void handleEvents(sf::Event event);
     void generateCollisionPoints();
     sf::Vector2f* lineIntersects(sf::Vector2f p0, sf::Vector2f p1);
+    sf::Vector2f* closestLineIntersect(sf::Vector2f origin, sf::Vector2f p0, sf::Vector2f p1);
     sf::Vector2f* carIntersects(Car *car);
 protected:
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
