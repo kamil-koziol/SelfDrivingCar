@@ -10,15 +10,14 @@
 
 class Population {
 public:
-    static const int amountOfCars = 200;
+    static const int amountOfCars = 500;
     Car cars[amountOfCars];
-    int leadingCarIndex;
+    int leadingCarIndex = 0;
     int ticks = 0;
 
 
     void setup(sf::RenderWindow *window);
     void update(Track *pTrack);
-    void setLeadingCar();
     void draw(sf::RenderTarget &target);
 
     void newGeneration();

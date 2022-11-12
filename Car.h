@@ -14,11 +14,9 @@
 #define DOWN_RIGHT 2
 #define DOWN_LEFT 3
 
-#define AMOUNT_OF_DECISIONS 4
-#define GO_FORWARD 0
-#define GO_BACKWARD 1
-#define GO_RIGHT 2
-#define GO_LEFT 3
+#define AMOUNT_OF_DECISIONS 2
+#define GO_RIGHT 0
+#define GO_LEFT 1
 
 
 class Track;
@@ -51,7 +49,7 @@ public:
     float rotatingSpeed = 3;
 
     bool isMoving = false;
-    float movementSpeed = 4;
+    float movementSpeed = -4;
 
     sf::Vector2f points[4];
 
@@ -66,6 +64,7 @@ public:
     void useBrain();
     void toggleHumanSteering();
     void calculateFitness();
+    void generationalReset();
 };
 
 

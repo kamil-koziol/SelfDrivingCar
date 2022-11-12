@@ -33,3 +33,7 @@ float binarize(float value, float threshhold) {
         return 0.0f;
     }
 }
+
+float lerp1d(float value1, float value2, float t) {
+    return value1 + (value2-value1)*t;
+}

@@ -11,7 +11,7 @@ public:
     int m,n;
     float *values; // MxN
     Matrix(int m, int n);
-    Matrix* mult(Matrix *other);
+    Matrix* dot(Matrix *other);
     void add(Matrix *other);
     float get(int x, int y);
     float get(int index);
@@ -19,6 +19,7 @@ public:
     void set(int index, float value);
     void print();
     void randomize(bool negatives=false);
+    void mutate(float amount);
     void copyFrom(Matrix *other);
     void applyFunction(float (*func) (float));
     void applyFunction(float (*func) (float, float), float);

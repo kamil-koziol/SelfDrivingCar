@@ -44,6 +44,10 @@ int main()
                 case sf::Event::Closed:
                     window.close();
                     break;
+                case sf::Event::KeyPressed:
+                    if(event.key.code == sf::Keyboard::Space) {
+                        population.newGeneration();
+                    }
             }
 
             car.handleEvents(event);
@@ -55,7 +59,7 @@ int main()
         car.tick();
         car.updateSensors(&track);
         car.brain->compute();
-
+        track.handleCarCheckpoints(&car);
         population.update(&track);
 
         track.update();

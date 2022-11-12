@@ -21,7 +21,9 @@ public:
     NeuralNetwork(int amountOfInputsNeurons, int amountOfHiddenLayers, int amountOfOutputNeurons, int hiddenLayerSizes[amountOfInputsNeurons]);
     void compute();
     void randomize();
+    void mutate(float amount);
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
+    void copyFrom(NeuralNetwork *other);
 };
 
 

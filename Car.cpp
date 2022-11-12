@@ -17,7 +17,7 @@ void Car::setup(sf::RenderWindow *window) {
 
     updateVisionLines();
 
-    int sizes[] = { 5 };
+    int sizes[] = { 8 };
     brain = new NeuralNetwork(amountOfVisionLines, 1, AMOUNT_OF_DECISIONS, sizes);
     brain->randomize();
 }
@@ -152,15 +152,7 @@ void Car::useBrain() {
         decisionValues[i] = outputLayer->neurons->get(i) == 1.0f;
     }
 
-    if(decisionValues[GO_FORWARD]) {
-        isMoving = true;
-        movementSpeed = -abs(movementSpeed);
-    } else if(decisionValues[GO_BACKWARD]) {
-        isMoving = true;
-        movementSpeed = abs(movementSpeed);
-    } else {
-        isMoving = false;
-    }
+    isMoving = true;
 
     if(decisionValues[GO_LEFT]) {
         isRotating = true;
@@ -178,8 +170,19 @@ void Car::toggleHumanSteering() {
 }
 
 void Car::calculateFitness() {
-    fitness = 1.0/(double) (totalCheckpointsReached/5.0);
+    fitness = 1.0/(double) (totalCheckpointsReached+1);
     if(crashed) {
-        fitness = std::max(0.0, fitness - 0.1);
+        fitness = std::min(1.0, fitness + 0.1);
     }
+}
+
+void Car::generationalReset() {
+    setPosition(200, 200);
+    fitness = 1;
+    totalCheckpointsReached = 0;
+    currentCheckpoint = 0;
+    crashed = false;
+    setRotation(0);
+    updatePointPositions();
+    updateVisionLines();
 }

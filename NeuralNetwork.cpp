@@ -31,7 +31,7 @@ NeuralNetwork::NeuralNetwork(int amountOfInputsNeurons, int amountOfHiddenLayers
 
 void NeuralNetwork::compute() {
     for(int i=0; i<amountOfLayers-1; i++) {
-        Matrix *calculationMatrix = layers[i]->weights->mult(layers[i]->neurons);
+        Matrix *calculationMatrix = layers[i]->weights->dot(layers[i]->neurons);
         calculationMatrix->add(layers[i]->biases);
         calculationMatrix->applyFunction(relu);
         calculationMatrix->applyFunction(normalize);
@@ -62,7 +62,7 @@ void NeuralNetwork::draw(sf::RenderTarget &target, sf::RenderStates states) cons
     };
 
     int ox = 1000, oy = 200;
-    int dx = 100, dy = 60;
+    int dx = 150, dy = 60;
 
 
     for(int i=0; i<amountOfLayers; i++) {
@@ -122,6 +122,19 @@ void NeuralNetwork::draw(sf::RenderTarget &target, sf::RenderStates states) cons
 
             target.draw(neuronShape);
         }
+    }
+}
+
+void NeuralNetwork::mutate(float amount) {
+    for(int i=0; i<amountOfLayers-1; i++) {
+        layers[i]->mutate(amount);
+    }
+}
+
+void NeuralNetwork::copyFrom(NeuralNetwork *other) {
+    // TODO: check for the same sizes
+    for(int i=0; i<amountOfLayers-1; i++) {
+        layers[i]->copyFrom(other->layers[i]);
     }
 }
 

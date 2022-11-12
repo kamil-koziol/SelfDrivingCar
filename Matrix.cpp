@@ -5,6 +5,7 @@
 #include "Matrix.h"
 #include "iostream"
 #include "time.h"
+#include "utils/MathUtils.h"
 
 Matrix::Matrix(int m, int n) {
     this->m = m;
@@ -15,7 +16,7 @@ Matrix::Matrix(int m, int n) {
     }
 }
 
-Matrix* Matrix::mult(Matrix *other) {
+Matrix* Matrix::dot(Matrix *other) {
     if(!canBeMultiplied(other)) return nullptr;
     Matrix *result = new Matrix(m, other->n);
     for (int i = 0; i < m; i++) {
@@ -51,16 +52,14 @@ void Matrix::print() {
 }
 
 void Matrix::randomize(bool negatives) {
-    for(int i=0; i<m; i++) {
-        for(int j=0; j<n; j++) {
-            float value = (float) rand()/RAND_MAX;
-            if(negatives) {
-                if(rand()%2==0) {
-                    value *= -1;
-                }
+    for(int i=0; i<m*n; i++) {
+        float value = (float) rand()/RAND_MAX;
+        if(negatives) {
+            if(rand()%2==0) {
+                value *= -1;
             }
-            set(j,i, value);
         }
+        values[i] = value;
     }
 }
 
@@ -105,6 +104,14 @@ float Matrix::get(int index) {
 
 void Matrix::set(int index, float value) {
     values[index] = value;
+}
+
+void Matrix::mutate(float amount) {
+    for(int i=0; i<m*n; i++) {
+        float value = (float) rand()/RAND_MAX;
+        if(rand()%2==0) value *= -1;
+        values[i] = lerp1d(values[i], value, amount);
+    }
 }
 
 

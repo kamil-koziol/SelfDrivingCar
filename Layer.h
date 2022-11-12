@@ -18,6 +18,10 @@ public:
 
     Layer(int size, int nextLayerSize);
     void randomize();
+
+    void mutate(float amount);
+
+    void copyFrom(Layer *pLayer);
 };
 
 

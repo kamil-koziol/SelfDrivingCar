@@ -3,14 +3,15 @@
 //
 
 #include "Population.h"
+#include "iostream"
+#include "time.h"
+#include "cmath"
 
 void Population::setup(sf::RenderWindow *window) {
 
     for(int i=0; i<amountOfCars; i++) {
         cars[i].setup(window);
     }
-
-    setLeadingCar();
 }
 
 void Population::update(Track *pTrack) {
@@ -28,10 +29,9 @@ void Population::update(Track *pTrack) {
         pTrack->handleCarCheckpoints(&cars[i]);
     }
 
-    setLeadingCar();
     ticks++;
 
-    if(ticks > 1200) {
+    if(ticks > 60*20) {
         newGeneration();
     }
 }
@@ -39,7 +39,7 @@ void Population::update(Track *pTrack) {
 void Population::draw(sf::RenderTarget &target) {
     for(int i=0;i<amountOfCars; i++) {
         if(i == leadingCarIndex) continue;
-        cars[i].setFillColor(sf::Color::White);
+        cars[i].setFillColor(sf::Color(255, 255, 255, 100));
         target.draw(cars[i]);
     }
 
@@ -48,21 +48,36 @@ void Population::draw(sf::RenderTarget &target) {
     target.draw(cars[leadingCarIndex]);
 }
 
-void Population::setLeadingCar() {
-    int bestCheckpoints = cars[0].totalCheckpointsReached;
-    leadingCarIndex = 0;
-
-    for(int i=0; i<amountOfCars; i++) {
-        if(cars[i].totalCheckpointsReached > bestCheckpoints) {
-            bestCheckpoints = cars[i].totalCheckpointsReached;
-            leadingCarIndex = i;
-        }
-    }
-}
-
 void Population::newGeneration() {
     // calculating fitnesses
+
+    double bestFitness = 1.0f;
+    int bestCarIndex = 0;
+
     for(int i=0; i<amountOfCars; i++) {
         cars[i].calculateFitness();
+        if(cars[i].fitness < bestFitness) {
+            bestFitness = cars[i].fitness;
+            bestCarIndex = i;
+        }
     }
+
+    leadingCarIndex = bestCarIndex;
+
+    std::cout<<cars[bestCarIndex].fitness<<'\n';
+    std::cout<<cars[bestCarIndex].totalCheckpointsReached<<'\n';
+
+    // best car stays without mutation
+    for(int i=0; i<amountOfCars; i++) {
+        if(i == bestCarIndex) continue;
+        cars[i].brain->copyFrom(cars[bestCarIndex].brain);
+        cars[i].brain->mutate(0.03f);
+    }
+
+
+    for(int i=0; i<amountOfCars; i++) {
+        cars[i].generationalReset();
+    }
+
+    ticks = 0;
 }

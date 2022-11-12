@@ -15,5 +15,6 @@ sf::Vector2f getOffsetedPointWithRotation(sf::Vector2f origin, float offsetX, fl
 float relu(float value);
 float normalize(float value);
 float binarize(float value, float threshhold=0.5f);
+float lerp1d(float value1, float value2, float t);
 
 #endif //SELFDRIVINGCAR_MATHUTILS_H

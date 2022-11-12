@@ -14,3 +14,13 @@ void Layer::randomize() {
     weights->randomize(true);
     biases->randomize(true);
 }
+
+void Layer::mutate(float amount) {
+    weights->mutate(amount);
+    biases->mutate(amount);
+}
+
+void Layer::copyFrom(Layer *pLayer) {
+    weights->copyFrom(pLayer->weights);
+    biases->copyFrom(pLayer->biases);
+}
