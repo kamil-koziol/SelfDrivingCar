@@ -25,3 +25,11 @@ float normalize(float value) {
         return value;
     }
 }
+
+float binarize(float value, float threshhold) {
+    if(value > threshhold) {
+        return 1.0f;
+    } else {
+        return 0.0f;
+    }
+}

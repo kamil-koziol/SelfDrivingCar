@@ -16,9 +16,15 @@ void Car::setup(sf::RenderWindow *window) {
     setOrigin(width/2,height/2);
 
     updateVisionLines();
+
+    int sizes[] = { 5 };
+    brain = new NeuralNetwork(amountOfVisionLines, 1, AMOUNT_OF_DECISIONS, sizes);
+    brain->randomize();
 }
 
 void Car::tick() {
+    if(crashed) return;
+
     if(isMoving) {
         move(movementSpeed * cos(getRotation() * DEG2RAD + M_PI / 2), movementSpeed * sin(getRotation() * DEG2RAD + M_PI / 2));
     }
@@ -29,10 +35,20 @@ void Car::tick() {
 
     updatePointPositions();
     updateVisionLines();
+
+    // input sensors
+    for(int i=0; i<amountOfVisionLines; i++) {
+        brain->layers[brain->inputLayerIndex]->neurons->set(i, sensors[i]);
+    }
+
+    if(!isHumanSteering) {
+        useBrain();
+    }
 }
 
 
 void Car::handleEvents(sf::Event event) {
+    if(!isHumanSteering) return;
     if(event.type == sf::Event::KeyPressed) {
         switch (event.key.code) {
             case sf::Keyboard::Left:
@@ -79,14 +95,6 @@ sf::Vector2f *Car::intersectsWithLine(sf::Vector2f p0, sf::Vector2f p1) {
     return nullptr;
 }
 
-//sf::Vector2f Car::getOffsetedPointWithRotation(float offsetX, float offsetY) {
-//    sf::Vector2f cp1 = getPosition();
-//    float angle = getRotation() * DEG2RAD;
-//    cp1.x += cos(angle) * offsetX - sin(angle) * offsetY;
-//    cp1.y += sin(angle) * offsetX + cos(angle) * offsetY;
-//    return cp1;
-//}
-
 void Car::updatePointPositions() {
     float angle = getRotation() * DEG2RAD;
     points[TOP_LEFT] = getOffsetedPointWithRotation(getPosition(), -width/2, -height/2, angle);
@@ -118,5 +126,60 @@ void Car::drawVisionLines() {
     for(int i=0; i<amountOfVisionLines; i++) {
         line[1] = visionLines[i];
         window->draw(line, 2, sf::Lines);
+    }
+}
+
+void Car::updateSensors(Track *track) {
+    for (int i = 0; i < amountOfVisionLines; i++) {
+        sf::Vector2f *colPoint = track->closestLineIntersect(visionLinesOrigin, visionLinesOrigin,
+                                                            visionLines[i]);
+        if (colPoint != nullptr) {
+
+            sf::Vector2f diff = visionLinesOrigin - *colPoint;
+
+            float distance = diff.x * diff.x + diff.y * diff.y;
+            sensors[i] = 1-(distance/float(visionLinesDistance*visionLinesDistance));
+        } else {
+            sensors[i] = 0.0f;
+        }
+
+    }
+}
+
+void Car::useBrain() {
+    Layer* outputLayer = brain->layers[brain->outputLayerIndex];
+    for(int i=0; i<outputLayer->size; i++) {
+        decisionValues[i] = outputLayer->neurons->get(i) == 1.0f;
+    }
+
+    if(decisionValues[GO_FORWARD]) {
+        isMoving = true;
+        movementSpeed = -abs(movementSpeed);
+    } else if(decisionValues[GO_BACKWARD]) {
+        isMoving = true;
+        movementSpeed = abs(movementSpeed);
+    } else {
+        isMoving = false;
+    }
+
+    if(decisionValues[GO_LEFT]) {
+        isRotating = true;
+        rotatingSpeed = -abs(rotatingSpeed);
+    } else if(decisionValues[GO_RIGHT]) {
+        isRotating = true;
+        rotatingSpeed = abs(rotatingSpeed);
+    } else {
+        isRotating = false;
+    }
+}
+
+void Car::toggleHumanSteering() {
+    isHumanSteering = !isHumanSteering;
+}
+
+void Car::calculateFitness() {
+    fitness = 1.0/(double) (totalCheckpointsReached/5.0);
+    if(crashed) {
+        fitness = std::max(0.0, fitness - 0.1);
     }
 }

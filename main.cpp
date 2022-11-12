@@ -9,8 +9,9 @@
 #include "Matrix.h"
 #include "time.h"
 #include "NeuralNetwork.h"
+#include "Population.h"
 
-const int width = 1000;
+const int width = 1500;
 const int height = 1000;
 
 
@@ -22,20 +23,16 @@ int main()
     sf::RenderWindow window(sf::VideoMode(width, height), "Self Driving Car");
     window.setFramerateLimit(60);
 
-    Car car;
     Track track;
-    int sizes[] = { 5 , 5};
-    NeuralNetwork network = NeuralNetwork(10, 2, 8, sizes);
-    Matrix input = Matrix(network.layers[network.inputLayerIndex]->size, 1);
-    input.randomize();
-    network.layers[network.inputLayerIndex]->neurons->copyFrom(&input);
-    network.randomize();
-    network.compute();
+    Population population;
+    Car car;
+    car.isHumanSteering = true;
 
     // setup
-
     car.setup(&window);
+    population.setup(&window);
     track.setup(&window);
+    track.load("track");
 
     while (window.isOpen())
     {
@@ -56,9 +53,12 @@ int main()
         // updating
 
         car.tick();
-        track.update();
+        car.updateSensors(&track);
+        car.brain->compute();
 
-        network.compute();
+        population.update(&track);
+
+        track.update();
 
         // drawing
         window.clear();
@@ -67,33 +67,7 @@ int main()
         car.drawVisionLines();
 
         window.draw(track);
-
-        window.draw(network);
-
-        sf::CircleShape shape(10.0f);
-
-        sf::Vector2f *isp = track.carIntersects(&car);
-        if (isp != nullptr) {
-            shape.setFillColor(sf::Color::Green);
-            shape.setRadius(15.0f);
-            shape.setPosition(*isp);
-            shape.move(-15.0f, -15.0f);
-            window.draw(shape);
-        }
-
-
-        for (int i = 0; i < car.amountOfVisionLines; i++) {
-            sf::Vector2f *colPoint = track.closestLineIntersect(car.visionLinesOrigin, car.visionLinesOrigin,
-                                                                car.visionLines[i]);
-            if (colPoint != nullptr) {
-                shape.setFillColor(sf::Color::Green);
-                shape.setRadius(15.0f);
-                shape.setPosition(*colPoint);
-                shape.move(-15.0f, -15.0f);
-                window.draw(shape);
-            }
-        }
-
+        population.draw(window);
 
         window.display();
     }

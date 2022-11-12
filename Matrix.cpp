@@ -92,9 +92,21 @@ void Matrix::applyFunction(float (*func)(float)) {
     }
 }
 
+void Matrix::applyFunction(float (*func)(float, float), float arg) {
+    for(int i=0; i<m*n; i++) {
+        values[i] = func(values[i], arg);
+    }
+}
+
+
 float Matrix::get(int index) {
     return values[index];
 }
+
+void Matrix::set(int index, float value) {
+    values[index] = value;
+}
+
 
 
 

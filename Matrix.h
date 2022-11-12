@@ -16,10 +16,12 @@ public:
     float get(int x, int y);
     float get(int index);
     void set(int x, int y, float value);
+    void set(int index, float value);
     void print();
     void randomize(bool negatives=false);
     void copyFrom(Matrix *other);
     void applyFunction(float (*func) (float));
+    void applyFunction(float (*func) (float, float), float);
     bool canBeMultiplied(Matrix *other);
     bool haveSameDimensions(Matrix *other);
 };
