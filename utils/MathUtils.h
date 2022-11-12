@@ -13,6 +13,6 @@
 
 sf::Vector2f getOffsetedPointWithRotation(sf::Vector2f origin, float offsetX, float offsetY, float rotation);
 float relu(float value);
-
+float normalize(float value);
 
 #endif //SELFDRIVINGCAR_MATHUTILS_H

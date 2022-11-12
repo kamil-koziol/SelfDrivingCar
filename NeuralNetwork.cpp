@@ -34,6 +34,7 @@ void NeuralNetwork::compute() {
         Matrix *calculationMatrix = layers[i]->weights->mult(layers[i]->neurons);
         calculationMatrix->add(layers[i]->biases);
         calculationMatrix->applyFunction(relu);
+        calculationMatrix->applyFunction(normalize);
         layers[i+1]->neurons->copyFrom(calculationMatrix);
     }
 }
@@ -62,8 +63,8 @@ void NeuralNetwork::draw(sf::RenderTarget &target, sf::RenderStates states) cons
 
         // draw neurons
         for(int j=0; j<layers[i]->size; j++) {
-            float neuronValue = layers[i]->neurons->get(j); // from 0 to 2
-            neuronValue *= 255.0f/2.0f;
+            float neuronValue = layers[i]->neurons->get(j); // from 0 to 1
+            neuronValue *= 255.0f;
             uint8_t color = floor(neuronValue);
             neuronShape.setFillColor(sf::Color(255, 255-color, 255-color));
 

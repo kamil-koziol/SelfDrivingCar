@@ -17,3 +17,11 @@ sf::Vector2f getOffsetedPointWithRotation(sf::Vector2f origin, float offsetX, fl
 float relu(float value) {
     return std::max(0.0f, value);
 }
+
+float normalize(float value) {
+    if(value > 1.0f) {
+        return 1.0f;
+    } else {
+        return value;
+    }
+}
