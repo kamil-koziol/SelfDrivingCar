@@ -8,17 +8,16 @@
 #include "iostream"
 #include "fstream"
 #include "vector"
+#include "utils/MathUtils.h"
 
 #define POINT_RADIUS 10
 
 void Track::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 
     // drawing dots
-    if(this->isShowingGizmos) {
+    if(this->inEditMode) {
         drawPoints(target, states);
     }
-
-    float step = 0.01f;
 
     // drawingBezierCurves
 
@@ -35,7 +34,7 @@ void Track::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 
 
     // drawing collisionPoints
-    if (this->isShowingGizmos) {
+    if (this->inEditMode) {
         for(auto & collisionPoints : pathCollisionPoints) {
             sf::Vertex line[2];
             if(collisionPoints.empty()) { continue; }
@@ -48,13 +47,18 @@ void Track::draw(sf::RenderTarget &target, sf::RenderStates states) const {
     }
 
     // draw checkpoints
-    if(isShowingGizmos) {
+    if(inEditMode) {
         sf::Vertex line[2];
         for (int i = 0; i < checkpoints.size(); i += 2) {
             line[0] = checkpoints[i];
             line[0].color = sf::Color::Green;
             line[1] = checkpoints[i + 1];
             line[1].color = sf::Color::Green;
+
+            if(i == startingCheckpoint * 2) {
+                line[0].color = sf::Color::Yellow;
+                line[1].color = sf::Color::Yellow;
+            }
 
             target.draw(line, 2, sf::LineStrip);
         }
@@ -114,38 +118,47 @@ void Track::drawPoints(sf::RenderTarget &target, sf::RenderStates states) const 
 
 void Track::handleEvents(sf::Event event) {
     if (event.type == sf::Event::KeyPressed) {
-        if (event.key.code == sf::Keyboard::T) {
-            paths[selectedPathIndex].push_back(sf::Vector2f(sf::Mouse::getPosition(*window)));
-            generateCollisionPoints();
-        }
         if (event.key.code == sf::Keyboard::N) {
-            this->isShowingGizmos = !this->isShowingGizmos;
+            this->inEditMode = !this->inEditMode;
         }
 
-        if (event.key.code == sf::Keyboard::S) {
-            save("track");
+        if(inEditMode) {
+            if (event.key.code == sf::Keyboard::T) {
+                paths[selectedPathIndex].push_back(sf::Vector2f(sf::Mouse::getPosition(*window)));
+                generateCollisionPoints();
+            }
+
+            else if (event.key.code == sf::Keyboard::S) {
+                save("track");
+            }
+
+            else if (event.key.code == sf::Keyboard::L) {
+                load("track");
+            }
+
+            else if (event.key.code == sf::Keyboard::D) {
+
+                paths[selectedPathIndex].pop_back();
+                generateCollisionPoints();
+            }
+
+            else if (event.key.code == sf::Keyboard::Equal) {
+                selectedPathIndex = (selectedPathIndex + 1) % amountOfPaths;
+            }
+
+            else if (event.key.code == sf::Keyboard::C) {
+                checkpoints.push_back(sf::Vector2f(sf::Mouse::getPosition(*window)));
+            }
+            else if(event.key.code == sf::Keyboard::O) {
+                sf::Vector2f mouse = sf::Vector2f(sf::Mouse::getPosition(*window));
+                setOriginAndRotation(mouse, 0);
+            }
         }
 
-        if (event.key.code == sf::Keyboard::L) {
-            load("track");
-        }
-
-        if (event.key.code == sf::Keyboard::D) {
-            paths[selectedPathIndex].pop_back();
-            generateCollisionPoints();
-        }
-
-        if(event.key.code == sf::Keyboard::Equal) {
-            selectedPathIndex = (selectedPathIndex+1)%amountOfPaths;
-        }
-
-        if(event.key.code == sf::Keyboard::C) {
-            checkpoints.push_back(sf::Vector2f(sf::Mouse::getPosition(*window)));
-        }
 
     }
     if (event.type == sf::Event::MouseButtonPressed) {
-        if (event.mouseButton.button == sf::Mouse::Left && this->isShowingGizmos) {
+        if (event.mouseButton.button == sf::Mouse::Left && this->inEditMode) {
             selectedPoint = searchForPoint(sf::Mouse::getPosition(*window));
         }
     }
@@ -258,6 +271,14 @@ void Track::save(std::string name) {
     for(auto & point: checkpoints) {
         file << point.x << " " << point.y << "\n";
     }
+
+    // starting position and starting Angle
+    file << startingPosition.x << " " << startingPosition.y << "\n";
+    file << startingAngle << "\n";
+
+    // starting Checkpoint
+    file << startingCheckpoint << "\n";
+
     file.close();
 }
 
@@ -267,6 +288,8 @@ void Track::load(std::string name) {
 
     std::ifstream  file;
     file.open(name);
+
+    // paths
     file >> amountOfPaths;
     setup(window);
 
@@ -295,13 +318,33 @@ void Track::load(std::string name) {
         checkpoints.push_back(point);
     }
 
+    // starting position and starting Angle
+    file >> startingPosition.x >> startingPosition.y;
+    file >> startingAngle;
+
+    // starting checkpoint
+    file >> startingCheckpoint;
+
     file.close();
 }
 
 void Track::handleCarCheckpoints(Car *car) {
-    int cpindex = car->currentCheckpoint*2;
+    if(checkpoints.size() < 2) { return; }
+    int cpindex = (car->currentCheckpoint*2 + startingCheckpoint*2) % (checkpoints.size());
     if(car->intersectsWithLine(checkpoints[cpindex], checkpoints[cpindex+1]) != nullptr) {
         car->currentCheckpoint = (car->currentCheckpoint+1) % (checkpoints.size()/2);
         car->totalCheckpointsReached++;
     }
+}
+
+void Track::setOriginAndRotation(sf::Vector2f origin, float rotation) {
+    startingPosition = origin;
+    startingAngle = rotation;
+}
+
+float Track::distanceOfCarToNextCheckpoint(Car *car) {
+    if(checkpoints.size() < 2) { return 0; }
+    int cpindex = (car->currentCheckpoint*2 + startingCheckpoint*2) % (checkpoints.size());
+    float distance = getDistanceFromPointToLine(car->getPosition(), checkpoints[cpindex], checkpoints[cpindex+1]);
+    return distance;
 }

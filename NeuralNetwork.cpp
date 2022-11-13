@@ -5,6 +5,7 @@
 #include "NeuralNetwork.h"
 #include "utils/MathUtils.h"
 #include "math.h"
+#include "fstream"
 
 
 NeuralNetwork::NeuralNetwork(int amountOfInputsNeurons, int amountOfHiddenLayers, int amountOfOutputNeurons, int hiddenLayerSizes[amountOfInputsNeurons]){
@@ -61,7 +62,7 @@ void NeuralNetwork::draw(sf::RenderTarget &target, sf::RenderStates states) cons
             sf::Vector2f()
     };
 
-    int ox = 1000, oy = 200;
+    int ox = 1500, oy = 50;
     int dx = 150, dy = 60;
 
 
@@ -136,5 +137,22 @@ void NeuralNetwork::copyFrom(NeuralNetwork *other) {
     for(int i=0; i<amountOfLayers-1; i++) {
         layers[i]->copyFrom(other->layers[i]);
     }
+}
+
+void NeuralNetwork::save(std::string name) {
+    std::ofstream file;
+    file.open(name);
+
+    for(int i=0; i<amountOfLayers-1; i++) {
+        for(int j=0; j<layers[i]->size; j++) {
+            // TODO: 
+        }
+    }
+
+    file.close();
+}
+
+void NeuralNetwork::load(std::string name) {
+
 }
 

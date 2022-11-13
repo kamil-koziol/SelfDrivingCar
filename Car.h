@@ -14,9 +14,11 @@
 #define DOWN_RIGHT 2
 #define DOWN_LEFT 3
 
-#define AMOUNT_OF_DECISIONS 2
+#define AMOUNT_OF_DECISIONS 4
 #define GO_RIGHT 0
 #define GO_LEFT 1
+#define ACCELERATE 2
+#define BRAKE 3
 
 
 class Track;
@@ -25,8 +27,10 @@ class Car: public sf::RectangleShape {
 public:
 
     sf::RenderWindow *window;
+    sf::Sprite sprite;
 
-    static const int amountOfVisionLines = 8;
+
+    static const int amountOfVisionLines = 11;
     int visionLinesDistance = 150;
     sf::Vector2f visionLines[amountOfVisionLines];
     sf::Vector2f visionLinesOrigin;
@@ -40,20 +44,26 @@ public:
     bool isHumanSteering = false;
     int currentCheckpoint = 0;
     int totalCheckpointsReached = 0;
-    int ticks = 0;
 
     float width = 10;
     float height = 35;
+
+    sf::Vector2f startingPosition;
 
     bool isRotating = false;
     float rotatingSpeed = 3;
 
     bool isMoving = false;
-    float movementSpeed = -4;
+    float velocity = 0;
+    float acceleration = 0;
+    float maxVelocity = 4.0f;
+    float brakeAmount = 0.7f;
+    float accelerationAmout = 0.5f;
+    float friction = 0.2f;
 
     sf::Vector2f points[4];
 
-    void setup(sf::RenderWindow *window);
+    void setup(sf::RenderWindow *window, sf::Vector2f startingPosition);
     void tick();
     void handleEvents(sf::Event event);
     sf::Vector2f* intersectsWithLine(sf::Vector2f p0, sf::Vector2f p1);
@@ -62,8 +72,7 @@ public:
     void drawVisionLines();
     void updateSensors(Track *track);
     void useBrain();
-    void toggleHumanSteering();
-    void calculateFitness();
+    void calculateFitness(Track *track);
     void generationalReset();
 };
 

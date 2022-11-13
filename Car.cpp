@@ -8,27 +8,38 @@
 #include "utils/CollisionUtils.h"
 #include "iostream"
 
-void Car::setup(sf::RenderWindow *window) {
+void Car::setup(sf::RenderWindow *window, sf::Vector2f startingPosition) {
     this->window = window;
+    this->startingPosition = startingPosition;
 
     setSize(sf::Vector2f(width, height));
-    setPosition(200, 200);
+    setPosition(startingPosition);
     setOrigin(width/2,height/2);
 
     updateVisionLines();
 
-    int sizes[] = { 8 };
-    brain = new NeuralNetwork(amountOfVisionLines, 1, AMOUNT_OF_DECISIONS, sizes);
+    int sizes[] = { 5 };
+    brain = new NeuralNetwork(amountOfVisionLines + 1, 1, AMOUNT_OF_DECISIONS, sizes);
     brain->randomize();
 }
 
 void Car::tick() {
     if(crashed) return;
 
-    if(isMoving) {
-        move(movementSpeed * cos(getRotation() * DEG2RAD + M_PI / 2), movementSpeed * sin(getRotation() * DEG2RAD + M_PI / 2));
+
+    // movement handling
+    velocity -= friction;
+    velocity += acceleration;
+    velocity = std::max(velocity, 0.0f);
+
+    if(velocity > maxVelocity) {
+        velocity = maxVelocity;
     }
 
+    move(-velocity * cos(getRotation() * DEG2RAD + M_PI / 2), -velocity * sin(getRotation() * DEG2RAD + M_PI / 2));
+
+
+    // rotation handling
     if(isRotating) {
         rotate(rotatingSpeed);
     }
@@ -40,6 +51,9 @@ void Car::tick() {
     for(int i=0; i<amountOfVisionLines; i++) {
         brain->layers[brain->inputLayerIndex]->neurons->set(i, sensors[i]);
     }
+
+    brain->layers[brain->inputLayerIndex]->neurons->set(amountOfVisionLines, velocity/maxVelocity);
+
 
     if(!isHumanSteering) {
         useBrain();
@@ -61,12 +75,10 @@ void Car::handleEvents(sf::Event event) {
                 break;
 
             case sf::Keyboard::Up:
-                isMoving = true;
-                movementSpeed = -abs(movementSpeed);
+                acceleration = accelerationAmout;
                 break;
             case sf::Keyboard::Down:
-                isMoving = true;
-                movementSpeed = abs(movementSpeed);
+                acceleration = -brakeAmount;
                 break;
         }
     } else if(event.type == sf::Event::KeyReleased) {
@@ -79,6 +91,7 @@ void Car::handleEvents(sf::Event event) {
             case sf::Keyboard::Down:
             case sf::Keyboard::Up:
                 isMoving = false;
+                acceleration = 0;
                 break;
         }
     }
@@ -107,7 +120,6 @@ void Car::updateVisionLines() {
 
     float angleStep = M_PI/(amountOfVisionLines - 1);
     float angle = -M_PI + getRotation()*DEG2RAD;
-
     visionLinesOrigin = getOffsetedPointWithRotation(getPosition(), 0, -height/2, getRotation() * DEG2RAD);
 
     for(int i=0; i<amountOfVisionLines; i++) {
@@ -138,12 +150,13 @@ void Car::updateSensors(Track *track) {
             sf::Vector2f diff = visionLinesOrigin - *colPoint;
 
             float distance = diff.x * diff.x + diff.y * diff.y;
-            sensors[i] = 1-(distance/float(visionLinesDistance*visionLinesDistance));
+
+            sensors[i] = (distance/(visionLinesDistance*visionLinesDistance*1.0f));
         } else {
             sensors[i] = 0.0f;
         }
-
     }
+
 }
 
 void Car::useBrain() {
@@ -151,8 +164,6 @@ void Car::useBrain() {
     for(int i=0; i<outputLayer->size; i++) {
         decisionValues[i] = outputLayer->neurons->get(i) == 1.0f;
     }
-
-    isMoving = true;
 
     if(decisionValues[GO_LEFT]) {
         isRotating = true;
@@ -163,25 +174,38 @@ void Car::useBrain() {
     } else {
         isRotating = false;
     }
-}
 
-void Car::toggleHumanSteering() {
-    isHumanSteering = !isHumanSteering;
-}
-
-void Car::calculateFitness() {
-    fitness = 1.0/(double) (totalCheckpointsReached+1);
-    if(crashed) {
-        fitness = std::min(1.0, fitness + 0.1);
+    if(decisionValues[ACCELERATE]) {
+        acceleration = accelerationAmout;
+    } else if(decisionValues[BRAKE]) {
+        acceleration = -brakeAmount;
     }
+
+
+}
+
+void Car::calculateFitness(Track *track) {
+    float distanceToNextCheckpoint = track->distanceOfCarToNextCheckpoint(this); // cannot be 0
+    fitness = 1.0/((double) (totalCheckpointsReached+1 + (1.0/(distanceToNextCheckpoint+1))));
+//    if(crashed) {
+//        fitness = std::min(1.0, fitness + 0.1);
+//    }
 }
 
 void Car::generationalReset() {
-    setPosition(200, 200);
+    setPosition(startingPosition);
+
     fitness = 1;
     totalCheckpointsReached = 0;
     currentCheckpoint = 0;
+
     crashed = false;
+    isMoving = false;
+    isRotating = false;
+
+    velocity = 0;
+    acceleration = 0;
+
     setRotation(0);
     updatePointPositions();
     updateVisionLines();

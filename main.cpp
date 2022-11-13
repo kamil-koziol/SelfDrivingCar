@@ -11,8 +11,8 @@
 #include "NeuralNetwork.h"
 #include "Population.h"
 
-const int width = 1500;
-const int height = 1000;
+const int width = 2200;
+const int height = 1080;
 
 
 
@@ -28,11 +28,33 @@ int main()
     Car car;
     car.isHumanSteering = true;
 
+    sf::Texture trackTexture;
+    trackTexture.loadFromFile("../assets/track.jpg");
+//    sf::Image image = trackTexture.copyToImage();
+//
+//    int iHeight = image.getSize().y, iWidth = image.getSize().x;
+//
+//    for(int y=0; y<iHeight; y++) {
+//        for(int x=0; x<iWidth; x++) {
+//            sf::Color imagecolor = image.getPixel(x, y);
+//            imagecolor.a -= 100;
+//            image.setPixel(x, y, imagecolor);
+//        }
+//    }
+//    trackTexture.loadFromImage(image);
+
+    sf::Sprite sprite;
+    sprite.setTexture(trackTexture);
+
+
     // setup
-    car.setup(&window);
-    population.setup(&window);
     track.setup(&window);
-    track.load("track");
+    track.load("../assets/track");
+
+    car.setup(&window, track.startingPosition);
+
+    population.setup(&window, &track);
+
 
     while (window.isOpen())
     {
@@ -46,7 +68,7 @@ int main()
                     break;
                 case sf::Event::KeyPressed:
                     if(event.key.code == sf::Keyboard::Space) {
-                        population.newGeneration();
+                        population.newGeneration(&track);
                     }
             }
 
@@ -59,13 +81,16 @@ int main()
         car.tick();
         car.updateSensors(&track);
         car.brain->compute();
-        track.handleCarCheckpoints(&car);
+//        track.handleCarCheckpoints(&car);
+
+
         population.update(&track);
 
         track.update();
 
         // drawing
         window.clear();
+        window.draw(sprite);
 
         window.draw(car);
         car.drawVisionLines();

@@ -9,6 +9,7 @@
 #include "Layer.h"
 
 #define INPUT_LAYER 0
+#include "string"
 
 class NeuralNetwork: public sf::Drawable {
 public:
@@ -24,6 +25,8 @@ public:
     void mutate(float amount);
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
     void copyFrom(NeuralNetwork *other);
+    void save(std::string name);
+    void load(std::string name);
 };
 
 

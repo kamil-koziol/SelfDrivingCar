@@ -12,6 +12,7 @@
 #define RAD2DEG (180/M_PI)
 
 sf::Vector2f getOffsetedPointWithRotation(sf::Vector2f origin, float offsetX, float offsetY, float rotation);
+float getDistanceFromPointToLine(sf::Vector2f point, sf::Vector2f p1, sf::Vector2f p2);
 float relu(float value);
 float normalize(float value);
 float binarize(float value, float threshhold=0.5f);
