@@ -25,7 +25,7 @@ void Population::update(Track *pTrack) {
 
         cars[i].tick();
         cars[i].updateSensors(pTrack);
-        cars[i].brain->compute();
+        cars[i].brain->feedForward();
 
         if(pTrack->carIntersects(&cars[i]) != nullptr) {
             // collision detected
@@ -90,7 +90,7 @@ void Population::newGeneration(Track *track) {
         }
 
         newCars[i].setup(window, track->startingPosition);
-        newCars[i].brain->copyFrom(cars[i].brain);
+        newCars[i].brain->copy(cars[i].brain);
         newCars[i].fitness = cars[i].fitness;
     }
 
@@ -100,7 +100,7 @@ void Population::newGeneration(Track *track) {
 
 //    Car previousBestCar;
 //    previousBestCar.setup(window, track->startingPosition);
-//    previousBestCar.brain->copyFrom(cars[bestCarIndex].brain);
+//    previousBestCar.brain->copy(cars[bestCarIndex].brain);
 
 //    Car newCars[amountOfCars];
 //    for(int i=0; i<amountOfCars; i++) {
@@ -113,16 +113,16 @@ void Population::newGeneration(Track *track) {
 //            if(randFit < 0) { break; }
 //            randomWeightedIndex++;
 //        }
-//        newCars->brain->copyFrom(cars[randomWeightedIndex].brain);
+//        newCars->brain->copy(cars[randomWeightedIndex].brain);
 //        newCars->brain->mutate(0.1f);
 //    }
 
 //    for(int i=0; i<amountOfCars/2; i++) {
-//        newCars[i].brain->copyFrom(previousBestCar.brain);
+//        newCars[i].brain->copy(previousBestCar.brain);
 //        newCars[i].brain->mutate(0.1f);
 //    }
 //
-//    newCars[bestCarIndex].brain->copyFrom(previousBestCar.brain);
+//    newCars[bestCarIndex].brain->copy(previousBestCar.brain);
 //    newCars[bestCarIndex].fitness = previousBestCar.fitness;
 
 
@@ -132,19 +132,21 @@ void Population::newGeneration(Track *track) {
     for(int i=0; i<amountOfCars; i++) {
         cars[i] = Car();
         cars[i].setup(window, track->startingPosition);
-        cars[i].brain->copyFrom(newCars[i%amountOfBests].brain);
+        cars[i].brain->copy(newCars[i % amountOfBests].brain);
         cars[i].brain->mutate(0.1f);
     }
 
 
     for(int i=0; i<30; i++) {
-        cars[i].brain->copyFrom(newCars[0].brain);
+        cars[i].brain->copy(newCars[0].brain);
         cars[i].brain->mutate(0.01f);
     }
 
     for(int i=0; i<amountOfBests; i++) {
-        cars[i].brain->copyFrom(newCars[i].brain);
+        cars[i].brain->copy(newCars[i].brain);
     }
+
+    cars[0].brain->save("brain.bin");
 
     ticks = 0;
 }

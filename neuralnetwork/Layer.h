@@ -17,6 +17,7 @@ public:
     Matrix *biases;
 
     Layer(int size, int nextLayerSize);
+
     void randomize();
 
     void mutate(float amount);

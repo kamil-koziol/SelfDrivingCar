@@ -6,9 +6,9 @@
 #include "utils/CollisionUtils.h"
 #include "vector"
 #include "thread"
-#include "Matrix.h"
+#include "neuralnetwork/Matrix.h"
 #include "time.h"
-#include "NeuralNetwork.h"
+#include "neuralnetwork/NeuralNetwork.h"
 #include "Population.h"
 
 const int width = 2200;
@@ -30,19 +30,6 @@ int main()
 
     sf::Texture trackTexture;
     trackTexture.loadFromFile("../assets/track.jpg");
-//    sf::Image image = trackTexture.copyToImage();
-//
-//    int iHeight = image.getSize().y, iWidth = image.getSize().x;
-//
-//    for(int y=0; y<iHeight; y++) {
-//        for(int x=0; x<iWidth; x++) {
-//            sf::Color imagecolor = image.getPixel(x, y);
-//            imagecolor.a -= 100;
-//            image.setPixel(x, y, imagecolor);
-//        }
-//    }
-//    trackTexture.loadFromImage(image);
-
     sf::Sprite sprite;
     sprite.setTexture(trackTexture);
 
@@ -52,7 +39,9 @@ int main()
     track.load("../assets/track");
 
     car.setup(&window, track.startingPosition);
-
+//    car.brain->save("brain.bin");
+    car.brain->load("brain.bin");
+    car.isHumanSteering = false;
     population.setup(&window, &track);
 
 
@@ -72,7 +61,7 @@ int main()
                     }
             }
 
-            car.handleEvents(event);
+//            car.handleEvents(event);
             track.handleEvents(event);
         }
 
@@ -80,8 +69,8 @@ int main()
 
         car.tick();
         car.updateSensors(&track);
-        car.brain->compute();
-//        track.handleCarCheckpoints(&car);
+        car.brain->feedForward();
+        track.handleCarCheckpoints(&car);
 
 
         population.update(&track);

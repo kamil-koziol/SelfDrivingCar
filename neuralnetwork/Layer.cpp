@@ -4,7 +4,7 @@
 
 #include "Layer.h"
 
-Layer::Layer(int size, int nextLayerSize): size(size) {
+Layer::Layer(int size, int nextLayerSize) : size(size) {
     neurons = new Matrix(size, 1);
     weights = new Matrix(nextLayerSize, size);
     biases = new Matrix(nextLayerSize, 1);

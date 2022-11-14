@@ -6,7 +6,7 @@
 #define SELFDRIVINGCAR_CAR_H
 
 #include <SFML/Graphics.hpp>
-#include "NeuralNetwork.h"
+#include "neuralnetwork/NeuralNetwork.h"
 #include "Track.h"
 
 #define TOP_LEFT 0
