@@ -2,7 +2,7 @@
 
 Project made in C++ using graphic library SFML
 
-![Movie]("movie.gif" "Movie")
+![Movie](readme/movie.gif "Movie")
 
 ## Neural Networks
 
@@ -10,13 +10,13 @@ Project uses neural networks and learns by [Genetic Algoritm](https://www.mathwo
 
 Logic behind neural network was made from scratch without using any libraries
 
-![Neural Network]("neuralnetwork.png" "Neural Network")
+![Neural Network](readme/neuralnetwork.png "Neural Network")
 
 ## Track editor
 
 There is track editor based on Bézier Curves, thanks to author of this [article](https://ciechanow.ski/drawing-bezier-curves/) i made beautiful curves which are also used for collisions. You can move, add, remove each point. Total amount of tracks is 9.
 
-![Track editor]("teditor.png" "Track Editor")
+![Track editor](readme/teditor.png "Track Editor")
 
 
 ## Neural network inputs
