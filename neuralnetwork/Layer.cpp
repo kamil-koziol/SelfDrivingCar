@@ -20,7 +20,12 @@ void Layer::mutate(float amount) {
     biases->mutate(amount);
 }
 
-void Layer::copyFrom(Layer *pLayer) {
-    weights->copyFrom(pLayer->weights);
-    biases->copyFrom(pLayer->biases);
+void Layer::copy(Layer *pLayer) {
+    weights->copy(pLayer->weights);
+    biases->copy(pLayer->biases);
+}
+
+void Layer::crossover(Layer *other) {
+    weights->crossover(other->weights);
+    biases->crossover(other->biases);
 }

@@ -14,11 +14,9 @@
 #define DOWN_RIGHT 2
 #define DOWN_LEFT 3
 
-#define AMOUNT_OF_DECISIONS 4
+#define AMOUNT_OF_DECISIONS 2
 #define GO_RIGHT 0
 #define GO_LEFT 1
-#define ACCELERATE 2
-#define BRAKE 3
 
 
 class Track;
@@ -30,8 +28,8 @@ public:
     sf::Sprite sprite;
 
 
-    static const int amountOfVisionLines = 11;
-    int visionLinesDistance = 150;
+    static const int amountOfVisionLines = 7;
+    int visionLinesDistance = 200;
     sf::Vector2f visionLines[amountOfVisionLines];
     sf::Vector2f visionLinesOrigin;
 
@@ -74,6 +72,8 @@ public:
     void useBrain();
     void calculateFitness(Track *track);
     void generationalReset();
+
+    double calculateExpectationFitness();
 };
 
 

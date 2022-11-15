@@ -64,7 +64,7 @@ void Matrix::randomize(bool negatives) {
     }
 }
 
-void Matrix::copyFrom(Matrix *other) {
+void Matrix::copy(Matrix *other) {
     if (!haveSameDimensions(other)) return;
     for (int i = 0; i < m * n; i++) {
         values[i] = other->values[i];
@@ -144,6 +144,16 @@ Matrix *Matrix::loadFromStream(std::ifstream *stream) {
 
 Matrix::~Matrix() {
     delete[] values;
+}
+
+void Matrix::crossover(Matrix *other) {
+    if(!haveSameDimensions(other)) return;
+    for(int i=0; i<n*m; i++) {
+        int r = rand()%2;
+        if(r == 0) {
+            values[i] = other->values[i];
+        }
+    }
 }
 
 

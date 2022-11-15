@@ -37,7 +37,7 @@ void NeuralNetwork::feedForward() {
         calculationMatrix->add(layers[i]->biases);
         calculationMatrix->applyFunction(relu);
         calculationMatrix->applyFunction(normalize);
-        layers[i + 1]->neurons->copyFrom(calculationMatrix);
+        layers[i + 1]->neurons->copy(calculationMatrix);
     }
 
     // binarize output based on threshhold
@@ -47,6 +47,13 @@ void NeuralNetwork::feedForward() {
 void NeuralNetwork::randomize() {
     for (int i = 0; i < amountOfLayers - 1; i++) {
         layers[i]->randomize();
+    }
+}
+
+void NeuralNetwork::crossover(NeuralNetwork *other) {
+    if(!haveSameSizes(other)) return;
+    for (int i = 0; i < amountOfLayers - 1; i++) {
+        layers[i]->crossover(other->layers[i]);
     }
 }
 
@@ -136,14 +143,10 @@ void NeuralNetwork::mutate(float amount) {
 
 void NeuralNetwork::copy(NeuralNetwork *other) {
     // checking for the same sizes
-    for(int i=0; i<amountOfLayers - 1; i++) {
-        if(layers[i]->size != other->layers[i]->size) {
-            return;
-        }
-    }
+    if(!haveSameSizes(other)) return;
 
     for (int i = 0; i < amountOfLayers - 1; i++) {
-        layers[i]->copyFrom(other->layers[i]);
+        layers[i]->copy(other->layers[i]);
     }
 }
 
@@ -189,8 +192,8 @@ void NeuralNetwork::load(std::string path) {
         Matrix *_weights = Matrix::loadFromStream(&file);
         Matrix *_biases = Matrix::loadFromStream(&file);
 
-        nn.layers[i]->weights->copyFrom(_weights);
-        nn.layers[i]->biases->copyFrom(_biases);
+        nn.layers[i]->weights->copy(_weights);
+        nn.layers[i]->biases->copy(_biases);
 
         delete _weights;
         delete _biases;
@@ -225,3 +228,14 @@ float NeuralNetwork::normalize(float value) {
         return value;
     }
 }
+
+bool NeuralNetwork::haveSameSizes(NeuralNetwork *other) {
+    for(int i=0; i<amountOfLayers - 1; i++) {
+        if(layers[i]->size != other->layers[i]->size) {
+            return false;
+        }
+    }
+
+    return true;
+}
+

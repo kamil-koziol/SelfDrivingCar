@@ -18,7 +18,7 @@ void Car::setup(sf::RenderWindow *window, sf::Vector2f startingPosition) {
 
     updateVisionLines();
 
-    int sizes[] = { 5 };
+    int sizes[] = { 8 };
     brain = new NeuralNetwork(amountOfVisionLines + 1, 1, AMOUNT_OF_DECISIONS, sizes);
     brain->randomize();
 }
@@ -28,9 +28,9 @@ void Car::tick() {
 
 
     // movement handling
-    velocity -= friction;
-    velocity += acceleration;
-    velocity = std::max(velocity, 0.0f);
+//    velocity -= friction;
+//    velocity += acceleration;
+    velocity = std::max(velocity, 6.0f);
 
     if(velocity > maxVelocity) {
         velocity = maxVelocity;
@@ -149,7 +149,7 @@ void Car::updateSensors(Track *track) {
 
             sf::Vector2f diff = visionLinesOrigin - *colPoint;
 
-            float distance = diff.x * diff.x + diff.y * diff.y;
+            float distance = (diff.x * diff.x) + (diff.y * diff.y);
 
             sensors[i] = (distance/(visionLinesDistance*visionLinesDistance*1.0f));
         } else {
@@ -174,19 +174,11 @@ void Car::useBrain() {
     } else {
         isRotating = false;
     }
-
-    if(decisionValues[ACCELERATE]) {
-        acceleration = accelerationAmout;
-    } else if(decisionValues[BRAKE]) {
-        acceleration = -brakeAmount;
-    }
-
-
 }
 
 void Car::calculateFitness(Track *track) {
     float distanceToNextCheckpoint = track->distanceOfCarToNextCheckpoint(this); // cannot be 0
-    fitness = 1.0/((double) (totalCheckpointsReached+1 + (1.0/(distanceToNextCheckpoint+1))));
+    fitness = 1.0/(((double) ((totalCheckpointsReached)+1 + (1.0/(distanceToNextCheckpoint+1)))));
 //    if(crashed) {
 //        fitness = std::min(1.0, fitness + 0.1);
 //    }
@@ -209,4 +201,8 @@ void Car::generationalReset() {
     setRotation(0);
     updatePointPositions();
     updateVisionLines();
+}
+
+double Car::calculateExpectationFitness() {
+    return pow((1.0/fitness), 3);
 }

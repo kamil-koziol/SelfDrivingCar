@@ -22,7 +22,9 @@ public:
 
     void mutate(float amount);
 
-    void copyFrom(Layer *pLayer);
+    void copy(Layer *pLayer);
+
+    void crossover(Layer *other);
 };
 
 

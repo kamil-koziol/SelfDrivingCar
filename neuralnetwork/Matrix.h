@@ -31,8 +31,9 @@ public:
     void randomize(bool negatives = false);
 
     void mutate(float amount);
+    void crossover(Matrix *other);
 
-    void copyFrom(Matrix *other);
+    void copy(Matrix *other);
 
     void applyFunction(float (*func)(float));
 

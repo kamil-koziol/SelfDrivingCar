@@ -128,14 +128,6 @@ void Track::handleEvents(sf::Event event) {
                 generateCollisionPoints();
             }
 
-            else if (event.key.code == sf::Keyboard::S) {
-                save("track");
-            }
-
-            else if (event.key.code == sf::Keyboard::L) {
-                load("track");
-            }
-
             else if (event.key.code == sf::Keyboard::D) {
 
                 paths[selectedPathIndex].pop_back();
@@ -153,18 +145,40 @@ void Track::handleEvents(sf::Event event) {
                 sf::Vector2f mouse = sf::Vector2f(sf::Mouse::getPosition(*window));
                 setOriginAndRotation(mouse, 0);
             }
+
+
+
+
         }
 
 
-    }
-    if (event.type == sf::Event::MouseButtonPressed) {
-        if (event.mouseButton.button == sf::Mouse::Left && this->inEditMode) {
-            selectedPoint = searchForPoint(sf::Mouse::getPosition(*window));
+        if(event.type == sf::Event::KeyPressed) {
+            if(event.key.code >= sf::Keyboard::Num1 && event.key.code <= sf::Keyboard::Num9) {
+                id = event.key.code - sf::Keyboard::Num1 + 1;
+            }
         }
+
+        if (event.key.code == sf::Keyboard::S) {
+            save("../assets/track" + std::to_string(id));
+        }
+
+        else if (event.key.code == sf::Keyboard::L) {
+            load("../assets/track" + std::to_string(id));
+        }
+
     }
-    if (event.type == sf::Event::MouseButtonReleased) {
-        if (event.mouseButton.button == sf::Mouse::Left) {
-            selectedPoint = nullptr;
+
+    if(inEditMode) {
+        if (event.type == sf::Event::MouseButtonPressed) {
+            if (event.mouseButton.button == sf::Mouse::Left) {
+                selectedPoint = searchForPoint(sf::Mouse::getPosition(*window));
+            }
+        }
+
+        if (event.type == sf::Event::MouseButtonReleased) {
+            if (event.mouseButton.button == sf::Mouse::Left) {
+                selectedPoint = nullptr;
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ class Car;
 class Track: public sf::Drawable, public sf::Transformable {
 public:
     sf::RenderWindow *window;
+    int id = 1;
 
     int segments = 8;
 

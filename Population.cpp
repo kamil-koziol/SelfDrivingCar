@@ -15,16 +15,20 @@ void Population::setup(sf::RenderWindow *window, Track *track) {
     for(int i=0; i<amountOfCars; i++) {
         cars[i].setup(window, track->startingPosition);
     }
+
+    font.loadFromFile("../assets/arial.ttf");
 }
 
 void Population::update(Track *pTrack) {
-    int carsUpdated = 0;
+    carsAlive = 0;
     for(int i=0; i<amountOfCars; i++) {
         if(cars[i].crashed) { continue;}
-        carsUpdated++;
+        carsAlive++;
 
         cars[i].tick();
-        cars[i].updateSensors(pTrack);
+        if(ticks % 3 == 0) {
+            cars[i].updateSensors(pTrack);
+        }
         cars[i].brain->feedForward();
 
         if(pTrack->carIntersects(&cars[i]) != nullptr) {
@@ -52,7 +56,7 @@ void Population::update(Track *pTrack) {
 
     ticks++;
 
-    if(ticks > 60*30 || carsUpdated == 0) {
+    if(ticks > 60*30 || carsAlive == 0) {
         newGeneration(pTrack);
     }
 }
@@ -71,21 +75,32 @@ void Population::draw(sf::RenderTarget &target) {
     target.draw(cars[leadingCarIndex]);
     cars[leadingCarIndex].brain->draw(target, sf::RenderStates::Default);
 
+    // texts
+    sf::Text text;
+    text.setFillColor(sf::Color::White);
+    text.setCharacterSize(48);
+    text.setFont(font);
+    text.setString("GENERATION: " + std::to_string(currentGeneration));
+    text.setPosition(1500, 700);
+    window->draw(text);
+
+    text.setPosition(1500, 750);
+    text.setString("FITNESS: " + std::to_string(bestFitness));
+    window->draw(text);
+
 }
 
 void Population::newGeneration(Track *track) {
     // calculating fitnesses
 
-    float sumOfFitnesses = 0;
-    double bestFitness = 1.0f;
+    double _bestFitness = 1.0f;
     int bestCarIndex = 0;
 
     Car newCars[amountOfCars];
     for(int i=0; i<amountOfCars; i++) {
         cars[i].calculateFitness(track);
-        sumOfFitnesses += 1.0f/cars[i].fitness;
-        if(cars[i].fitness < bestFitness) {
-            bestFitness = cars[i].fitness;
+        if(cars[i].fitness < _bestFitness) {
+            _bestFitness = cars[i].fitness;
             bestCarIndex = i;
         }
 
@@ -94,59 +109,41 @@ void Population::newGeneration(Track *track) {
         newCars[i].fitness = cars[i].fitness;
     }
 
-
-
-    bestFitnessCarBefore = bestCarIndex;
-
-//    Car previousBestCar;
-//    previousBestCar.setup(window, track->startingPosition);
-//    previousBestCar.brain->copy(cars[bestCarIndex].brain);
-
-//    Car newCars[amountOfCars];
-//    for(int i=0; i<amountOfCars; i++) {
-//        newCars[i].setup(window, track->startingPosition);
-//        double randFit = ((float)rand()/RAND_MAX) * sumOfFitnesses;
-//
-//        int randomWeightedIndex = 0;
-//        while(randFit > 0) {
-//            randFit -= 1.0f/cars[randomWeightedIndex].fitness;
-//            if(randFit < 0) { break; }
-//            randomWeightedIndex++;
-//        }
-//        newCars->brain->copy(cars[randomWeightedIndex].brain);
-//        newCars->brain->mutate(0.1f);
-//    }
-
-//    for(int i=0; i<amountOfCars/2; i++) {
-//        newCars[i].brain->copy(previousBestCar.brain);
-//        newCars[i].brain->mutate(0.1f);
-//    }
-//
-//    newCars[bestCarIndex].brain->copy(previousBestCar.brain);
-//    newCars[bestCarIndex].fitness = previousBestCar.fitness;
-
+    bestFitness = cars[bestCarIndex].fitness;
 
     std::sort(newCars, newCars + amountOfCars,[](Car const & a, Car const & b) -> bool { return a.fitness < b.fitness; } );
 
-    int amountOfBests = 10;
+    int sumOfExpectationFitnesses = getSumOfExpectedFitnesses(cars);
+    // elites stay 0 -> amountOfElites
+    for(int i=amountOfElites; i<amountOfCars; i++) {
+        if(i%2 == 0) {
+        // crossovers
+            int parent1 = getRandomWeightedIndex(cars, sumOfExpectationFitnesses);
+            int parent2;
+            do {
+                parent2 = getRandomWeightedIndex(cars, sumOfExpectationFitnesses);
+            } while(parent1 != parent2);
+
+            newCars[i].brain->copy(cars[parent1].brain);
+            newCars[i].brain->crossover(cars[parent2].brain);
+        }  else {
+        // mutations
+           int parentIndex = getRandomWeightedIndex(cars, sumOfExpectationFitnesses);
+           newCars[i].brain->copy(cars[parentIndex].brain);
+           newCars[i].brain->mutate(0.05f);
+        }
+    }
+
     for(int i=0; i<amountOfCars; i++) {
         cars[i] = Car();
         cars[i].setup(window, track->startingPosition);
-        cars[i].brain->copy(newCars[i % amountOfBests].brain);
-        cars[i].brain->mutate(0.1f);
-    }
-
-
-    for(int i=0; i<30; i++) {
-        cars[i].brain->copy(newCars[0].brain);
-        cars[i].brain->mutate(0.01f);
-    }
-
-    for(int i=0; i<amountOfBests; i++) {
         cars[i].brain->copy(newCars[i].brain);
     }
 
-    cars[0].brain->save("brain.bin");
+    currentGeneration++;
+
+    cars[0].brain->save("generations/brain" + std::to_string(currentGeneration) + ".bin");
+    bestFitnessCarBefore = 0;
 
     ticks = 0;
 }
@@ -162,4 +159,39 @@ void Population::setLeadingCarIndex() {
     }
 
     leadingCarIndex = bestIndex;
+}
+
+double Population::getSumOfExpectedFitnesses(Car *population) {
+    double sumOfExpectationFitnesses = 0;
+    for(int i=0; i<amountOfCars; i++) {
+        sumOfExpectationFitnesses += population[i].calculateExpectationFitness();
+    }
+    return sumOfExpectationFitnesses;
+}
+
+int Population::getRandomWeightedIndex(Car population[], double sumOfExpectationFitnesses) {
+
+    double randomExceptationFitness = ((float)rand()/RAND_MAX) * sumOfExpectationFitnesses;
+
+    int randomWeightedIndex = 0;
+    while(randomExceptationFitness > 0) {
+        randomExceptationFitness -= cars[randomWeightedIndex].calculateExpectationFitness();
+        if(randomExceptationFitness < 0) break;
+        randomWeightedIndex++;
+    }
+
+    return randomWeightedIndex;
+}
+
+void Population::loadFromFile(std::string path) {
+
+    NeuralNetwork *nn = cars[0].brain;
+    nn->load(path);
+
+    for(int i=0; i<amountOfCars; i++) {
+        cars[i].brain->copy(nn);
+        if(i != 0) {
+            cars[i].brain->mutate(0.01f);
+        }
+    }
 }

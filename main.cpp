@@ -10,6 +10,7 @@
 #include "time.h"
 #include "neuralnetwork/NeuralNetwork.h"
 #include "Population.h"
+#include "UI.h"
 
 const int width = 2200;
 const int height = 1080;
@@ -18,15 +19,17 @@ const int height = 1080;
 
 int main()
 {
+
     srand(time(NULL));
+
+    bool pause = false;
 
     sf::RenderWindow window(sf::VideoMode(width, height), "Self Driving Car");
     window.setFramerateLimit(60);
 
     Track track;
     Population population;
-    Car car;
-    car.isHumanSteering = true;
+    UI ui;
 
     sf::Texture trackTexture;
     trackTexture.loadFromFile("../assets/track.jpg");
@@ -35,14 +38,12 @@ int main()
 
 
     // setup
+    ui.setup();
     track.setup(&window);
-    track.load("../assets/track");
+    track.load("../assets/track" + std::to_string(track.id));
 
-    car.setup(&window, track.startingPosition);
-//    car.brain->save("brain.bin");
-    car.brain->load("brain.bin");
-    car.isHumanSteering = false;
     population.setup(&window, &track);
+//    population.loadFromFile("../assets/brain.bin");
 
 
     while (window.isOpen())
@@ -59,33 +60,38 @@ int main()
                     if(event.key.code == sf::Keyboard::Space) {
                         population.newGeneration(&track);
                     }
+                    if(event.key.code == sf::Keyboard::L) {
+                        population.newGeneration(&track);
+                    }
+                    if(event.key.code == sf::Keyboard::P) {
+                        pause = !pause;
+                    }
+                    if(event.key.code == sf::Keyboard::B) {
+                        population.loadFromFile("../assets/brain.bin");
+                        population.newGeneration(&track);
+                    }
             }
 
-//            car.handleEvents(event);
             track.handleEvents(event);
         }
 
         // updating
 
-        car.tick();
-        car.updateSensors(&track);
-        car.brain->feedForward();
-        track.handleCarCheckpoints(&car);
-
-
-        population.update(&track);
-
         track.update();
+
+        if(!pause) {
+            population.update(&track);
+        }
 
         // drawing
         window.clear();
         window.draw(sprite);
 
-        window.draw(car);
-        car.drawVisionLines();
-
         window.draw(track);
+
         population.draw(window);
+
+        window.draw(ui);
 
         window.display();
     }

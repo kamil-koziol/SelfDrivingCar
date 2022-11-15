@@ -43,6 +43,9 @@ public:
     static float relu(float value);
 
     static float normalize(float value);
+
+    void crossover(NeuralNetwork *other);
+    bool haveSameSizes(NeuralNetwork *other);
 };
 
 #endif //SELFDRIVINGCAR_NEURALNETWORK_H

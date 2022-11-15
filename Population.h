@@ -7,13 +7,15 @@
 
 
 #include "Car.h"
+#include "string"
+
 
 class Population {
 public:
     Track *track;
     sf::RenderWindow *window;
 
-    static const int amountOfCars = 200;
+    static const int amountOfCars = 350;
     Car cars[amountOfCars];
     int bestFitnessCarBefore = 0;
     int leadingCarIndex = 0;
@@ -21,11 +23,24 @@ public:
     int ticks = 0;
 
 
+    int currentGeneration = 0;
+    int carsAlive = 0;
+    float bestFitness = 0.0f;
+
+    // UI
+    sf::Font font;
+
+    int amountOfElites = 10;
+
     void setup(sf::RenderWindow *window, Track *track);
     void update(Track *pTrack);
     void draw(sf::RenderTarget &target);
     void newGeneration(Track *track);
     void setLeadingCarIndex();
+
+    int getRandomWeightedIndex(Car population[], double sumOfExpectedFitnesses);
+    double getSumOfExpectedFitnesses(Car population[]);
+    void loadFromFile(std::string path);
 };
 
 
