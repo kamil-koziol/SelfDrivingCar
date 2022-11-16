@@ -178,16 +178,13 @@ void Car::useBrain() {
 
 void Car::calculateFitness(Track *track) {
     float distanceToNextCheckpoint = track->distanceOfCarToNextCheckpoint(this); // cannot be 0
-    fitness = 1.0/(((double) ((totalCheckpointsReached)+1 + (1.0/(distanceToNextCheckpoint+1)))));
-//    if(crashed) {
-//        fitness = std::min(1.0, fitness + 0.1);
-//    }
+    fitness = totalCheckpointsReached+(1.0/(distanceToNextCheckpoint + 1));
 }
 
 void Car::generationalReset() {
     setPosition(startingPosition);
 
-    fitness = 1;
+    fitness = 0;
     totalCheckpointsReached = 0;
     currentCheckpoint = 0;
 
@@ -204,5 +201,5 @@ void Car::generationalReset() {
 }
 
 double Car::calculateExpectationFitness() {
-    return pow((1.0/fitness), 3);
+    return pow(fitness, 2);
 }

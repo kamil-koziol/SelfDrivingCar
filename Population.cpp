@@ -93,13 +93,13 @@ void Population::draw(sf::RenderTarget &target) {
 void Population::newGeneration(Track *track) {
     // calculating fitnesses
 
-    double _bestFitness = 1.0f;
+    double _bestFitness = 0.0f;
     int bestCarIndex = 0;
 
     Car newCars[amountOfCars];
     for(int i=0; i<amountOfCars; i++) {
         cars[i].calculateFitness(track);
-        if(cars[i].fitness < _bestFitness) {
+        if(cars[i].fitness > _bestFitness) {
             _bestFitness = cars[i].fitness;
             bestCarIndex = i;
         }
@@ -111,9 +111,9 @@ void Population::newGeneration(Track *track) {
 
     bestFitness = cars[bestCarIndex].fitness;
 
-    std::sort(newCars, newCars + amountOfCars,[](Car const & a, Car const & b) -> bool { return a.fitness < b.fitness; } );
+    std::sort(newCars, newCars + amountOfCars,[](Car const & a, Car const & b) -> bool { return a.fitness > b.fitness; } );
 
-    int sumOfExpectationFitnesses = getSumOfExpectedFitnesses(cars);
+    double sumOfExpectationFitnesses = getSumOfExpectedFitnesses(cars);
     // elites stay 0 -> amountOfElites
     for(int i=amountOfElites; i<amountOfCars; i++) {
         if(i%2 == 0) {
@@ -130,7 +130,7 @@ void Population::newGeneration(Track *track) {
         // mutations
            int parentIndex = getRandomWeightedIndex(cars, sumOfExpectationFitnesses);
            newCars[i].brain->copy(cars[parentIndex].brain);
-           newCars[i].brain->mutate(0.05f);
+           newCars[i].brain->mutate(0.2f);
         }
     }
 

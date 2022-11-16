@@ -36,7 +36,7 @@ public:
     NeuralNetwork *brain;
     float sensors[amountOfVisionLines];
     bool decisionValues[AMOUNT_OF_DECISIONS];
-    double fitness = 1;
+    double fitness = 0;
 
     bool crashed = false;
     bool isHumanSteering = false;
